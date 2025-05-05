@@ -10,4 +10,4 @@ sample = np.array([[1, 90, 62, 12, 66, 25.1, 0.167, 21]])
 sample_scaled = scaler.transform(sample)
 
 prediction = model.predict(sample_scaled)
-print("✅ Predicted Outcome:", "Diabetic" if prediction[0] == 1 else "Not Diabetic")
+print(" Predicted Outcome:", "Diabetic" if prediction[0] == 1 else "Not Diabetic")
