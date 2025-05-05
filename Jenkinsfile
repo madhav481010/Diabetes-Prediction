@@ -4,33 +4,33 @@ pipeline {
     stages {
         stage('Install Python Dependencies') {
             steps {
-                bat 'python -m pip install --upgrade pip'
-                bat 'pip install -r requirements.txt'
+                bat '"C:\\Users\\hp1\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -m pip install --upgrade pip'
+                bat '"C:\\Users\\hp1\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -m pip install -r requirements.txt'
             }
         }
 
         stage('Job 1: Preprocess Data') {
             steps {
-                bat 'python preprocess.py'
+                bat '"C:\\Users\\hp1\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" preprocess.py'
             }
         }
 
         stage('Job 2: Train and Evaluate Models') {
             steps {
-                bat 'python train_and_evaluate.py'
+                bat '"C:\\Users\\hp1\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" train_and_evaluate.py'
             }
         }
 
         stage('Job 3: Deploy and Predict') {
             steps {
-                bat 'python deploy.py'
+                bat '"C:\\Users\\hp1\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" deploy.py'
             }
         }
     }
 
     post {
         success {
-            echo '✅ All stages completed successfully.'
+            echo '✅ Pipeline completed successfully.'
         }
         failure {
             echo '❌ Pipeline failed.'
