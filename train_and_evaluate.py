@@ -37,4 +37,4 @@ for name, model in models.items():
 os.makedirs('models', exist_ok=True)
 with open('models/best_model.pkl', 'wb') as f: pickle.dump(best_model, f)
 
-print(f"✅ Best model saved: {best_name} with accuracy {best_accuracy}")
+print(f" Best model saved: {best_name} with accuracy {best_accuracy}")
