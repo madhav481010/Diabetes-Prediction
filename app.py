@@ -1,6 +1,7 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, send_from_directory
 import pickle
 import numpy as np
+import os
 
 app = Flask(__name__)
 
@@ -12,7 +13,7 @@ with open('data/scaler.pkl', 'rb') as f:
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return send_from_directory(os.getcwd(), 'index.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -24,7 +25,7 @@ def predict():
     # Make prediction
     prediction = model.predict(sample_scaled)
     result = "Diabetic" if prediction[0] == 1 else "Not Diabetic"
-    return render_template('index.html', prediction=result)
+    return send_from_directory(os.getcwd(), 'index.html') + f"<h2>Prediction: {result}</h2>"
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
