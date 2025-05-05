@@ -25,4 +25,4 @@ with open('data/y_train.pkl', 'wb') as f: pickle.dump(y_train, f)
 with open('data/y_test.pkl', 'wb') as f: pickle.dump(y_test, f)
 with open('data/scaler.pkl', 'wb') as f: pickle.dump(scaler, f)
 
-print("✅ Data preprocessing completed.")
+print("Data preprocessing completed.")
