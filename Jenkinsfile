@@ -26,6 +26,12 @@ pipeline {
                 bat '"C:\\Users\\hp1\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" deploy.py'
             }
         }
+
+        stage('Start Flask Server') {
+            steps {
+                bat 'start cmd /k "C:\\Users\\hp1\\AppData\\Local\\Programs\\Python\\Python313\\python.exe app.py"'
+            }
+        }
     }
 
     post {
