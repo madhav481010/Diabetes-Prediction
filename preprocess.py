@@ -7,7 +7,7 @@ import pickle
 
 columns = ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin',
            'BMI', 'DiabetesPedigreeFunction', 'Age', 'Outcome']
-df = pd.read_csv("https://raw.githubusercontent.com/madhav481010/Devops/main/diabetes.csv", names=columns, header=0)
+df = pd.read_csv("https://raw.githubusercontent.com/madhav481010/Diabetes-Prediction/main/diabetes.csv", names=columns, header=0)
 
 X = df.drop('Outcome', axis=1)
 y = df['Outcome']
