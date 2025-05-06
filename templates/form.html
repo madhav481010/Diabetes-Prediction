@@ -1,16 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form</title>
+    <title>Diabetes Prediction</title>
 </head>
 <body>
-    <h1>Welcome to the Form</h1>
-    <form action="/submit" method="POST">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name">
-        <button type="submit">Submit</button>
+    <h2>Enter Patient Details</h2>
+    <form method="POST" action="/predict">
+        {% for field in ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age'] %}
+            <label>{{ field }}:</label>
+            <input type="number" step="any" name="{{ field }}" required><br><br>
+        {% endfor %}
+        <input type="submit" value="Predict">
     </form>
+
+    {% if prediction is not none %}
+        <h3>Prediction: {{ prediction }} (0 = No Diabetes, 1 = Diabetes)</h3>
+    {% endif %}
 </body>
 </html>
