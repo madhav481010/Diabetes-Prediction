@@ -2,6 +2,12 @@ pipeline {
     agent any
 
     stages {
+        stage('Clone Repository') {
+            steps {
+                git 'https://github.com/madhav481010/Diabetes-Prediction.git'
+            }
+        }
+
         stage('Install Python Dependencies') {
             steps {
                 bat '"C:\\Users\\hp1\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -m pip install --upgrade pip'
@@ -32,7 +38,6 @@ pipeline {
                 bat '"C:\\Users\\hp1\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" app.py'
             }
         }
-
     }
 
     post {
