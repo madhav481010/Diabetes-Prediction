@@ -13,6 +13,7 @@ with open('data/scaler.pkl', 'rb') as f:
 
 @app.route('/')
 def home():
+    # Return form with no prediction when loading the homepage
     return render_template('form.html', prediction=None)
 
 @app.route('/predict', methods=['POST'])
@@ -25,6 +26,8 @@ def predict():
     # Make prediction
     prediction = model.predict(sample_scaled)
     result = "Diabetic" if prediction[0] == 1 else "Not Diabetic"
+
+    # Return the form again with the prediction result
     return render_template('form.html', prediction=result)
 
 if __name__ == '__main__':
