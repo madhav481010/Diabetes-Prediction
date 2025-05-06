@@ -1,13 +1,13 @@
 from flask import Flask, request, render_template
 import pickle
 import numpy as np
-import os
 
 app = Flask(__name__)
 
 # Load the model and scaler
 with open('models/best_model.pkl', 'rb') as f:
     model = pickle.load(f)
+
 with open('data/scaler.pkl', 'rb') as f:
     scaler = pickle.load(f)
 
