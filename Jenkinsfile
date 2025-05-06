@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/madhav481010/Diabetes-Prediction.git'
+                git branch: 'main', url: 'https://github.com/madhav481010/Diabetes-Prediction.git'
             }
         }
 
