@@ -13,7 +13,7 @@ with open('data/scaler.pkl', 'rb') as f:
 
 @app.route('/')
 def home():
-    return render_template('form.html')
+    return render_template('form.html', prediction=None)
 
 @app.route('/predict', methods=['POST'])
 def predict():
