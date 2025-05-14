@@ -18,7 +18,12 @@ with open('data/y_test.pkl', 'rb') as f:
     y_test = pickle.load(f)
 
 # Create directory for models
-os.makedirs('models', exist_ok=True)
+import traceback
+try:
+    os.makedirs('models', exist_ok=True)
+except Exception as e:
+    print("Failed to create directory:", e)
+    traceback.print_exc()
 
 # Initialize classifiers
 models = {
