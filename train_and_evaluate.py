@@ -1,4 +1,3 @@
-# train_and_evaluate.py
 import pickle
 import os
 from sklearn.linear_model import LogisticRegression
@@ -18,6 +17,10 @@ with open('data/y_test.pkl', 'rb') as f: y_test = pickle.load(f)
 # Create directories if they don't exist
 os.makedirs('models', exist_ok=True)
 os.makedirs('data', exist_ok=True)
+
+# Debugging paths
+print("Saving model to:", os.path.abspath('models/best_model.pkl'))
+print("Saving scaler to:", os.path.abspath('data/scaler.pkl'))
 
 # Initialize models
 models = {
@@ -54,5 +57,3 @@ with open('data/scaler.pkl', 'wb') as f:
 
 # Output best model info
 print(f"Best model saved: {best_name} with accuracy {best_accuracy}")
-print("Saving model to:", os.path.abspath('models/best_model.pkl'))
-print("Saving scaler to:", os.path.abspath('data/scaler.pkl'))
