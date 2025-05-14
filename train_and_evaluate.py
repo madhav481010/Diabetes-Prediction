@@ -19,8 +19,10 @@ os.makedirs('models', exist_ok=True)
 os.makedirs('data', exist_ok=True)
 
 # Debugging paths
-print("Saving model to:", os.path.abspath('models/best_model.pkl'))
-print("Saving scaler to:", os.path.abspath('data/scaler.pkl'))
+model_path = os.path.abspath('models/best_model.pkl')
+scaler_path = os.path.abspath('data/scaler.pkl')
+print("Saving model to:", model_path)
+print("Saving scaler to:", scaler_path)
 
 # Initialize models
 models = {
@@ -47,14 +49,19 @@ for name, model in models.items():
         best_name = name
 
 # Save best model
-with open('models/best_model.pkl', 'wb') as f:
+with open(model_path, 'wb') as f:
     pickle.dump(best_model, f)
 
-# Save scaler (assuming it's used for scaling input data in the deployment phase)
+# Save scaler
 scaler = StandardScaler().fit(X_train)
-with open('data/scaler.pkl', 'wb') as f:
+with open(scaler_path, 'wb') as f:
     pickle.dump(scaler, f)
 
 # Output best model info
 print(f"Best model saved: {best_name} with accuracy {best_accuracy}")
 print(os.getcwd())
+
+# Check if files exist
+print("Checking if files exist...")
+print(f"Model exists: {os.path.exists(model_path)}")
+print(f"Scaler exists: {os.path.exists(scaler_path)}")
