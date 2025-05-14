@@ -57,3 +57,4 @@ with open('data/scaler.pkl', 'wb') as f:
 
 # Output best model info
 print(f"Best model saved: {best_name} with accuracy {best_accuracy}")
+print(os.getcwd())
