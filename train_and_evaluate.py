@@ -15,7 +15,7 @@ print("Current working directory:", os.getcwd())
 try:
     os.makedirs('models', exist_ok=True)
 except Exception as e:
-    print("❌ Failed to create 'models' directory:", e)
+    print(" Failed to create 'models' directory:", e)
     traceback.print_exc()
 
 # Load processed data
@@ -29,7 +29,7 @@ try:
     with open('data/y_test.pkl', 'rb') as f:
         y_test = pickle.load(f)
 except Exception as e:
-    print("❌ Error loading data:", e)
+    print(" Error loading data:", e)
     traceback.print_exc()
     exit(1)
 
@@ -47,7 +47,7 @@ best_accuracy = 0
 best_model_name = ""
 
 # Train and evaluate models
-print("\n🚀 Training and evaluating models...\n")
+print("\n Training and evaluating models...\n")
 for name, model in models.items():
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
@@ -64,13 +64,13 @@ try:
     with open(model_save_path, 'wb') as f:
         pickle.dump(best_model, f)
 except Exception as e:
-    print("❌ Error saving model:", e)
+    print(" Error saving model:", e)
     traceback.print_exc()
     exit(1)
 
-print("\n✔️ Model training complete.")
-print(f"🏆 Best Model: {best_model_name} with accuracy: {best_accuracy:.4f}")
-print(f"📁 Saved model at: {os.path.abspath(model_save_path)}")
+print("\n Model training complete.")
+print(f" Best Model: {best_model_name} with accuracy: {best_accuracy:.4f}")
+print(f" Saved model at: {os.path.abspath(model_save_path)}")
 
 # Final file existence check
 print("\nChecking saved files...")
@@ -92,7 +92,7 @@ print("Current working directory:", os.getcwd())
 try:
     os.makedirs('models', exist_ok=True)
 except Exception as e:
-    print("❌ Failed to create 'models' directory:", e)
+    print(" Failed to create 'models' directory:", e)
     traceback.print_exc()
 
 # Load processed data
@@ -106,7 +106,7 @@ try:
     with open('data/y_test.pkl', 'rb') as f:
         y_test = pickle.load(f)
 except Exception as e:
-    print("❌ Error loading data:", e)
+    print(" Error loading data:", e)
     traceback.print_exc()
     exit(1)
 
@@ -124,7 +124,7 @@ best_accuracy = 0
 best_model_name = ""
 
 # Train and evaluate models
-print("\n🚀 Training and evaluating models...\n")
+print("\n Training and evaluating models...\n")
 for name, model in models.items():
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
@@ -141,13 +141,13 @@ try:
     with open(model_save_path, 'wb') as f:
         pickle.dump(best_model, f)
 except Exception as e:
-    print("❌ Error saving model:", e)
+    print(" Error saving model:", e)
     traceback.print_exc()
     exit(1)
 
-print("\n✔️ Model training complete.")
-print(f"🏆 Best Model: {best_model_name} with accuracy: {best_accuracy:.4f}")
-print(f"📁 Saved model at: {os.path.abspath(model_save_path)}")
+print("\n✔ Model training complete.")
+print(f" Best Model: {best_model_name} with accuracy: {best_accuracy:.4f}")
+print(f" Saved model at: {os.path.abspath(model_save_path)}")
 
 # Final file existence check
 print("\nChecking saved files...")
