@@ -54,3 +54,5 @@ with open('data/scaler.pkl', 'wb') as f:
 
 # Output best model info
 print(f"Best model saved: {best_name} with accuracy {best_accuracy}")
+print("Saving model to:", os.path.abspath('models/best_model.pkl'))
+print("Saving scaler to:", os.path.abspath('data/scaler.pkl'))
