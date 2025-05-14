@@ -7,6 +7,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 # Create directory for models
+print("Current working directory:", os.getcwd())
+
 import traceback
 try:
     os.makedirs('models', exist_ok=True)
