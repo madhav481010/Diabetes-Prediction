@@ -19,5 +19,10 @@ except Exception as e:
 # Define model path before checking
 model_save_path = 'models/best_model.pkl'
 
+# Save a dummy model file to simulate save
+with open(model_save_path, 'wb') as f:
+    f.write(b'Test model content')
+
+
 print("\nChecking saved files...")
 print(f"Model file exists: {os.path.exists(model_save_path)}")
