@@ -7,12 +7,19 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
 
+# Load data
 with open('data/X_train.pkl', 'rb') as f: X_train = pickle.load(f)
 with open('data/X_test.pkl', 'rb') as f: X_test = pickle.load(f)
 with open('data/y_train.pkl', 'rb') as f: y_train = pickle.load(f)
 with open('data/y_test.pkl', 'rb') as f: y_test = pickle.load(f)
 
+# Create directories if they don't exist
+os.makedirs('models', exist_ok=True)
+os.makedirs('data', exist_ok=True)
+
+# Initialize models
 models = {
     'LogisticRegression': LogisticRegression(),
     'RandomForest': RandomForestClassifier(),
@@ -23,7 +30,9 @@ models = {
 
 best_model = None
 best_accuracy = 0
+best_name = ""
 
+# Train and evaluate models
 for name, model in models.items():
     model.fit(X_train, y_train)
     preds = model.predict(X_test)
@@ -34,7 +43,14 @@ for name, model in models.items():
         best_model = model
         best_name = name
 
-os.makedirs('models', exist_ok=True)
-with open('models/best_model.pkl', 'wb') as f: pickle.dump(best_model, f)
+# Save best model
+with open('models/best_model.pkl', 'wb') as f:
+    pickle.dump(best_model, f)
 
-print(f" Best model saved: {best_name} with accuracy {best_accuracy}")
+# Save scaler (assuming it's used for scaling input data in the deployment phase)
+scaler = StandardScaler().fit(X_train)
+with open('data/scaler.pkl', 'wb') as f:
+    pickle.dump(scaler, f)
+
+# Output best model info
+print(f"Best model saved: {best_name} with accuracy {best_accuracy}")
