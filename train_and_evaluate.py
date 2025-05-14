@@ -145,7 +145,7 @@ except Exception as e:
     traceback.print_exc()
     exit(1)
 
-print("\n✔ Model training complete.")
+print("\n Model training complete.")
 print(f" Best Model: {best_model_name} with accuracy: {best_accuracy:.4f}")
 print(f" Saved model at: {os.path.abspath(model_save_path)}")
 
