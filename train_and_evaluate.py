@@ -1,5 +1,6 @@
-import pickle
 import os
+import pickle
+import traceback
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
@@ -7,23 +8,30 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 
-# Load processed data
-with open('data/X_train.pkl', 'rb') as f:
-    X_train = pickle.load(f)
-with open('data/X_test.pkl', 'rb') as f:
-    X_test = pickle.load(f)
-with open('data/y_train.pkl', 'rb') as f:
-    y_train = pickle.load(f)
-with open('data/y_test.pkl', 'rb') as f:
-    y_test = pickle.load(f)
+# Show working directory
+print("Current working directory:", os.getcwd())
 
 # Create directory for models
-import traceback
 try:
     os.makedirs('models', exist_ok=True)
 except Exception as e:
-    print("Failed to create directory:", e)
+    print("❌ Failed to create 'models' directory:", e)
     traceback.print_exc()
+
+# Load processed data
+try:
+    with open('data/X_train.pkl', 'rb') as f:
+        X_train = pickle.load(f)
+    with open('data/X_test.pkl', 'rb') as f:
+        X_test = pickle.load(f)
+    with open('data/y_train.pkl', 'rb') as f:
+        y_train = pickle.load(f)
+    with open('data/y_test.pkl', 'rb') as f:
+        y_test = pickle.load(f)
+except Exception as e:
+    print("❌ Error loading data:", e)
+    traceback.print_exc()
+    exit(1)
 
 # Initialize classifiers
 models = {
@@ -39,7 +47,7 @@ best_accuracy = 0
 best_model_name = ""
 
 # Train and evaluate models
-print("\nTraining and evaluating models...\n")
+print("\n🚀 Training and evaluating models...\n")
 for name, model in models.items():
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
@@ -52,8 +60,13 @@ for name, model in models.items():
 
 # Save the best model
 model_save_path = 'models/best_model.pkl'
-with open(model_save_path, 'wb') as f:
-    pickle.dump(best_model, f)
+try:
+    with open(model_save_path, 'wb') as f:
+        pickle.dump(best_model, f)
+except Exception as e:
+    print("❌ Error saving model:", e)
+    traceback.print_exc()
+    exit(1)
 
 print("\n✔️ Model training complete.")
 print(f"🏆 Best Model: {best_model_name} with accuracy: {best_accuracy:.4f}")
