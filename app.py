@@ -7,7 +7,7 @@ from pathlib import Path
 app = Flask(__name__)
 
 # Load model and metrics
-with open('models/best_model.pkl', 'rb') as f:
+with open('best_model.pkl', 'rb') as f:
     model = pickle.load(f)
 
 with open('artifacts/model_metrics.json') as f:
