@@ -126,14 +126,18 @@
                 errorDiv.textContent = '';
             }
         }
-        submitBtn.disabled = !allValid;
+        if (submitBtn) {
+            submitBtn.disabled = !allValid;
+        }
     }
 
-    form.querySelectorAll('input[type="number"]').forEach(input => {
-        input.addEventListener('input', validateInputs);
+    document.addEventListener('DOMContentLoaded', () => {
+        validateInputs();
+        form.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', validateInputs);
+        });
     });
-
-    window.onload = validateInputs;
 </script>
+
 </body>
 </html>
