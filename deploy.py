@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 # Path to the trained model
-model_path = 'best_model.pkl'
+model_path = 'models/best_model.pkl'
 
 # Load model
 with open(model_path, 'rb') as f:
