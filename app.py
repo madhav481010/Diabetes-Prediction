@@ -7,10 +7,10 @@ from pathlib import Path
 app = Flask(__name__)
 
 # Load model and metrics
-with open('best_model.pkl', 'rb') as f:
+with open('models/best_model.pkl', 'rb') as f:
     model = pickle.load(f)
 
-with open('model_metrics.json') as f:
+with open('artifacts/model_metrics.json') as f:
     metrics_data = json.load(f)
 
 # Prepare model cards
