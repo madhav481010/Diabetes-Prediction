@@ -145,7 +145,7 @@ try:
     with open(model_save_path, 'wb') as f:
         pickle.dump(best_model, f)
     with open(metrics_save_path, 'wb') as f:
-        pickle.dump(results, f, indent=2)   
+        pickle.dump(results, f)   
 except Exception as e:
     print("Error saving model:", e)
     traceback.print_exc()
