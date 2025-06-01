@@ -10,7 +10,7 @@ app = Flask(__name__)
 with open('best_model.pkl', 'rb') as f:
     model = pickle.load(f)
 
-with open('model_metrics.json', 'rb') as f:
+with open('model_metrics.json', 'r') as f:
     metrics_data = json.load(f)
 
 # Prepare model cards
