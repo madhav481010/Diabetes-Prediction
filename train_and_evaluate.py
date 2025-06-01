@@ -19,7 +19,6 @@ os.makedirs('models', exist_ok=True)
 
 # Show working directory
 print("Current working directory:", os.getcwd())
-os.makedirs('models', exist_ok=True)
 
 # Load processed data
 try:
@@ -72,6 +71,7 @@ best_model = None
 best_score = 0.0
 best_model_name = ""
 results = {}
+roc_data = {}
 
 print("\nTraining and evaluating models...\n")
 
@@ -105,10 +105,12 @@ for name, model in models.items():
         'weighted_score': score
     }
 
-    # Generate ROC curve
+    # Generate ROC curve data
     fpr, tpr, _ = roc_curve(y_test, y_proba)
     roc_auc = auc(fpr, tpr)
+    roc_data[name] = {'fpr': fpr.tolist(), 'tpr': tpr.tolist(), 'auc': roc_auc}
     
+    # Save ROC plot
     plt.figure()
     plt.plot(fpr, tpr, label=f'{name} (AUC = {roc_auc:.2f})')
     plt.plot([0, 1], [0, 1], 'k--')
@@ -136,16 +138,18 @@ for name, model in models.items():
         best_model = model
         best_model_name = name
 
-# Save metrics
-
-# Save the best model
+# Save metrics and ROC data
 model_save_path = 'models/best_model.pkl'
 metrics_save_path = 'models/model_metrics.json'
+roc_data_path = 'models/roc_data.json'
+
 try:
     with open(model_save_path, 'wb') as f:
         pickle.dump(best_model, f)
     with open(metrics_save_path, 'w') as f:
-        json.dump(results, f, indent = 2)   
+        json.dump(results, f, indent=2)
+    with open(roc_data_path, 'w') as f:
+        json.dump(roc_data, f, indent=2)
 except Exception as e:
     print("Error saving model:", e)
     traceback.print_exc()
@@ -155,11 +159,12 @@ print("\nModel training complete.")
 print("\nBest Model Based on Weighted Healthcare Metrics:")
 print(f"{best_model_name} with Weighted Score: {best_score:.4f}")
 print(f"Saved model at: {os.path.abspath(model_save_path)}")
-print(f"Saved model at: {os.path.abspath(metrics_save_path)}")
+print(f"Saved metrics at: {os.path.abspath(metrics_save_path)}")
 
 # Final file existence check
 print("\nChecking saved files...")
 print(f"Model file exists: {os.path.exists(model_save_path)}")
-print(f"Model file exists: {os.path.exists(metrics_save_path)}")
+print(f"Metrics file exists: {os.path.exists(metrics_save_path)}")
+print(f"ROC data file exists: {os.path.exists(roc_data_path)}")
 print(f"Artifacts directory exists: {artifacts_dir.exists()}")
 print("Training complete. Artifacts saved in artifacts/ directory")
