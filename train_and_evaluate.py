@@ -1,4 +1,3 @@
-Running train_and_evaluate.py
 
 import os
 import pickle
