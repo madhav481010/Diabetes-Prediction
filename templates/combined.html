@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Diabetes Prediction System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -28,6 +29,22 @@
         .metric-value {
             font-weight: bold;
             color: #0d6efd;
+        }
+        #rocChart {
+            width: 100%;
+            height: 400px;
+        }
+        .model-rank {
+            font-size: 1.2rem;
+            color: #fff;
+            background-color: #0d6efd;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
         }
     </style>
 </head>
@@ -74,13 +91,24 @@
             {% endif %}
         </div>
         
-        <!-- Model Metrics Dashboard -->
-        <h2 class="my-4">Model Performance Metrics</h2>
+        <!-- Top 3 Models Dashboard -->
+        <h2 class="my-4">Top 3 Performing Models</h2>
         
+        <!-- Combined ROC Chart -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">ROC Curves Comparison</h3>
+            </div>
+            <div class="card-body">
+                <div id="rocChart"></div>
+            </div>
+        </div>
+        
+        <!-- Individual Model Cards -->
         {% for model in models %}
         <div class="card">
             <div class="card-header bg-primary text-white">
-                <h3 class="mb-0">{{ model.name }}</h3>
+                <h3 class="mb-0"><span class="model-rank">{{ loop.index }}</span> {{ model.name }}</h3>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -109,5 +137,38 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Prepare ROC data for Plotly
+        const rocData = [
+            {% for model in models %}
+            {
+                name: '{{ model.name }} (AUC = ' + {{ "%.2f"|format(model.metrics.roc_auc) }} + ')',
+                x: {{ roc_data[model.name]['fpr']|tojson }},
+                y: {{ roc_data[model.name]['tpr']|tojson }},
+                type: 'scatter',
+                mode: 'lines',
+                line: {width: 2}
+            },
+            {% endfor %}
+            {
+                name: 'Random Chance',
+                x: [0, 1],
+                y: [0, 1],
+                type: 'scatter',
+                mode: 'lines',
+                line: {dash: 'dash', color: 'black', width: 1}
+            }
+        ];
+
+        const layout = {
+            title: 'ROC Curves Comparison',
+            xaxis: {title: 'False Positive Rate', range: [0, 1]},
+            yaxis: {title: 'True Positive Rate', range: [0, 1.05]},
+            legend: {orientation: 'h', y: -0.2},
+            margin: {t: 50, b: 100, l: 50, r: 50}
+        };
+
+        Plotly.newPlot('rocChart', rocData, layout);
+    </script>
 </body>
 </html>
