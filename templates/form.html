@@ -1,20 +1,139 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Diabetes Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f7f7;
+            padding: 40px;
+        }
+        .container {
+            background: #fff;
+            max-width: 500px;
+            margin: auto;
+            padding: 30px 40px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin: 12px 0 6px;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        .error {
+            color: red;
+            font-size: 13px;
+            margin-top: 2px;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 25px;
+        }
+        input[type="submit"] {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        input[type="submit"]:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 18px;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
-    <h2>Enter Patient Details</h2>
-    <form method="POST" action="/predict">
-        {% for field in ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age'] %}
-            <label>{{ field }}:</label>
-            <input type="number" step="any" name="{{ field }}" required><br><br>
+<div class="container">
+    <h2>Diabetes Prediction</h2>
+    <form id="predictionForm" method="POST" action="/predict">
+        {% set ranges = {
+            'Pregnancies': [0, 20],
+            'Glucose': [50, 200],
+            'BloodPressure': [40, 140],
+            'SkinThickness': [10, 100],
+            'Insulin': [15, 846],
+            'BMI': [15, 50],
+            'DiabetesPedigreeFunction': [0.1, 2.5],
+            'Age': [15, 100]
+        } %}
+
+        {% for field, range in ranges.items() %}
+            <label for="{{ field }}">{{ field }}</label>
+            <input type="number" step="any" name="{{ field }}" id="{{ field }}"
+                   min="{{ range[0] }}" max="{{ range[1] }}" required>
+            <div class="error" id="{{ field }}Error"></div>
         {% endfor %}
-        <input type="submit" value="Predict">
+
+        <div class="button-container">
+            <input type="submit" value="Predict" id="submitBtn" disabled>
+        </div>
     </form>
 
     {% if prediction is not none %}
-        <h3>Prediction: {{ prediction }}</h3>
+        <div class="result">
+            <h3>Prediction: {{ prediction }}</h3>
+        </div>
     {% endif %}
+</div>
+
+<script>
+    const ranges = {
+        'Pregnancies': [0, 20],
+        'Glucose': [50, 200],
+        'BloodPressure': [40, 140],
+        'SkinThickness': [10, 100],
+        'Insulin': [15, 846],
+        'BMI': [15, 50],
+        'DiabetesPedigreeFunction': [0.1, 2.5],
+        'Age': [15, 100]
+    };
+
+    const form = document.getElementById('predictionForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function validateInputs() {
+        let allValid = true;
+        for (const [field, [min, max]] of Object.entries(ranges)) {
+            const input = document.getElementById(field);
+            const errorDiv = document.getElementById(field + 'Error');
+            const value = parseFloat(input.value);
+            if (isNaN(value) || value < min || value > max) {
+                errorDiv.textContent = `Enter a valid ${field} between ${min} and ${max}`;
+                allValid = false;
+            } else {
+                errorDiv.textContent = '';
+            }
+        }
+        submitBtn.disabled = !allValid;
+    }
+
+    form.querySelectorAll('input[type="number"]').forEach(input => {
+        input.addEventListener('input', validateInputs);
+    });
+
+    window.onload = validateInputs;
+</script>
 </body>
 </html>
