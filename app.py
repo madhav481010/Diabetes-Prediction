@@ -8,28 +8,28 @@ app = Flask(__name__)
 with open('best_model.pkl', 'rb') as f:
     model = pickle.load(f)
 
-# Define valid input ranges for each feature
+# Define valid input ranges for server-side validation
 valid_ranges = {
     "Pregnancies": (0, 20),
     "Glucose": (50, 200),
     "BloodPressure": (40, 140),
-    "SkinThickness": (7, 99),
+    "SkinThickness": (10, 100),
     "Insulin": (15, 846),
     "BMI": (15, 50),
-    "DiabetesPedigreeFunction": (0.05, 2.5),
-    "Age": (21, 100),
+    "DiabetesPedigreeFunction": (0.1, 2.5),
+    "Age": (15, 100),
 }
 
 @app.route('/')
 def home():
-    return render_template('form.html', prediction=None, error=None)
+    return render_template('form.html', prediction=None, error=[])
 
 @app.route('/predict', methods=['POST'])
 def predict():
     input_data = []
     error_messages = []
 
-    for i, (key, (min_val, max_val)) in enumerate(valid_ranges.items()):
+    for key, (min_val, max_val) in valid_ranges.items():
         try:
             value = float(request.form[key])
             if not (min_val <= value <= max_val):
@@ -41,11 +41,11 @@ def predict():
     if error_messages:
         return render_template('form.html', prediction=None, error=error_messages)
 
-    # Convert to numpy array and predict
+    # Predict
     sample = np.array([input_data])
     prediction = model.predict(sample)
     result = "Diabetic" if prediction[0] == 1 else "Not Diabetic"
-    return render_template('form.html', prediction=result, error=None)
+    return render_template('form.html', prediction=result, error=[])
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
