@@ -146,7 +146,7 @@ metrics_save_path = 'models/model_metrics.json'
 try:
     with open(model_save_path, 'wb') as f:
         pickle.dump(best_model, f)
-    with open(metrics_save_pathh, 'wb') as f:
+    with open(metrics_save_path, 'wb') as f:
         pickle.dump(results, f, indent=2)   
 except Exception as e:
     print("Error saving model:", e)
