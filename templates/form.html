@@ -37,7 +37,7 @@
         .error {
             color: red;
             font-size: 13px;
-            margin-top: 2px;
+            margin-top: 5px;
         }
         .button-container {
             text-align: center;
@@ -52,10 +52,6 @@
             border-radius: 6px;
             cursor: pointer;
         }
-        input[type="submit"]:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
         .result {
             text-align: center;
             margin-top: 25px;
@@ -67,7 +63,18 @@
 <body>
 <div class="container">
     <h2>Diabetes Prediction</h2>
-    <form id="predictionForm" method="POST" action="/predict">
+
+    {% if error %}
+        <div class="error">
+            <ul>
+                {% for err in error %}
+                    <li>{{ err }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <form method="POST" action="/predict">
         {% set ranges = {
             'Pregnancies': [0, 20],
             'Glucose': [50, 200],
@@ -83,61 +90,18 @@
             <label for="{{ field }}">{{ field }}</label>
             <input type="number" step="any" name="{{ field }}" id="{{ field }}"
                    min="{{ range[0] }}" max="{{ range[1] }}" required>
-            <div class="error" id="{{ field }}Error"></div>
         {% endfor %}
 
         <div class="button-container">
-            <input type="submit" value="Predict" id="submitBtn" disabled>
+            <input type="submit" value="Predict">
         </div>
     </form>
 
-    {% if prediction is not none %}
+    {% if prediction %}
         <div class="result">
             <h3>Prediction: {{ prediction }}</h3>
         </div>
     {% endif %}
 </div>
-
-<script>
-    const ranges = {
-        'Pregnancies': [0, 20],
-        'Glucose': [50, 200],
-        'BloodPressure': [40, 140],
-        'SkinThickness': [10, 100],
-        'Insulin': [15, 846],
-        'BMI': [15, 50],
-        'DiabetesPedigreeFunction': [0.1, 2.5],
-        'Age': [15, 100]
-    };
-
-    const form = document.getElementById('predictionForm');
-    const submitBtn = document.getElementById('submitBtn');
-
-    function validateInputs() {
-        let allValid = true;
-        for (const [field, [min, max]] of Object.entries(ranges)) {
-            const input = document.getElementById(field);
-            const errorDiv = document.getElementById(field + 'Error');
-            const value = parseFloat(input.value);
-            if (isNaN(value) || value < min || value > max) {
-                errorDiv.textContent = `Enter a valid ${field} between ${min} and ${max}`;
-                allValid = false;
-            } else {
-                errorDiv.textContent = '';
-            }
-        }
-        if (submitBtn) {
-            submitBtn.disabled = !allValid;
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        validateInputs();
-        form.querySelectorAll('input[type="number"]').forEach(input => {
-            input.addEventListener('input', validateInputs);
-        });
-    });
-</script>
-
 </body>
 </html>
