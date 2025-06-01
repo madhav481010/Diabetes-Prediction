@@ -19,6 +19,7 @@ os.makedirs('models', exist_ok=True)
 
 # Show working directory
 print("Current working directory:", os.getcwd())
+os.makedirs('models', exist_ok=True)
 
 # Load processed data
 try:
@@ -141,9 +142,12 @@ with open(artifacts_dir / 'model_metrics.json', 'w') as f:
 
 # Save the best model
 model_save_path = 'models/best_model.pkl'
+metrics_save_path = 'models/model_metrics.json'
 try:
     with open(model_save_path, 'wb') as f:
         pickle.dump(best_model, f)
+    with open(metrics_save_pathh, 'wb') as f:
+        pickle.dump(results, f, indent=2)   
 except Exception as e:
     print("Error saving model:", e)
     traceback.print_exc()
@@ -153,9 +157,11 @@ print("\nModel training complete.")
 print("\nBest Model Based on Weighted Healthcare Metrics:")
 print(f"{best_model_name} with Weighted Score: {best_score:.4f}")
 print(f"Saved model at: {os.path.abspath(model_save_path)}")
+print(f"Saved model at: {os.path.abspath(metrics_save_path)}")
 
 # Final file existence check
 print("\nChecking saved files...")
 print(f"Model file exists: {os.path.exists(model_save_path)}")
+print(f"Model file exists: {os.path.exists(metrics_save_path)}")
 print(f"Artifacts directory exists: {artifacts_dir.exists()}")
 print("Training complete. Artifacts saved in artifacts/ directory")
