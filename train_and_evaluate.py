@@ -137,8 +137,6 @@ for name, model in models.items():
         best_model_name = name
 
 # Save metrics
-with open(artifacts_dir / 'model_metrics.json', 'w') as f:
-    json.dump(results, f, indent=2)
 
 # Save the best model
 model_save_path = 'models/best_model.pkl'
