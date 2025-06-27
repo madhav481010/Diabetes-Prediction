@@ -1,21 +1,8 @@
 from flask import Flask, request, render_template
 import pickle
 import numpy as np
-from prometheus_flask_exporter import PrometheusMetrics
-from prometheus_client import Counter, Summary
 
-app = Flask(__name__)
-
-# Prometheus metrics initialization
-metrics = PrometheusMetrics(app)
-
-# Counter for prediction outcomes
-prediction_counter = Counter(
-    'diabetes_prediction_total', 'Total predictions made', ['result']
-)
-
-# Summary to measure inference time
-inference_timer = Summary('diabetes_model_inference_seconds', 'Time for model inference')
+app = Flask(_name_)
 
 # Load the trained model
 with open('best_model.pkl', 'rb') as f:
@@ -37,11 +24,6 @@ valid_ranges = {
 def home():
     return render_template('form.html', prediction=None, error=[])
 
-# Wrap the prediction logic with the inference timer
-@inference_timer.time()
-def make_prediction(sample):
-    return model.predict(sample)
-
 @app.route('/predict', methods=['POST'])
 def predict():
     input_data = []
@@ -59,15 +41,11 @@ def predict():
     if error_messages:
         return render_template('form.html', prediction=None, error=error_messages)
 
-    # Perform prediction
+    # Predict
     sample = np.array([input_data])
-    prediction = make_prediction(sample)
+    prediction = model.predict(sample)
     result = "Diabetic" if prediction[0] == 1 else "Not Diabetic"
-
-    # Increment Prometheus counter for prediction result
-    prediction_counter.labels(result=result).inc()
-
     return render_template('form.html', prediction=result, error=[])
 
-if __name__ == '__main__':
+if _name_ == '_main_':
     app.run(debug=True, host='0.0.0.0', port=5000)
