@@ -18,6 +18,18 @@ except:
         print(f"Error loading model: {e}")
         model = None
 
+# Define validation ranges
+valid_ranges = {
+    "Pregnancies": (0, 20),
+    "Glucose": (50, 200),
+    "BloodPressure": (40, 140),
+    "SkinThickness": (10, 100),
+    "Insulin": (15, 846),
+    "BMI": (15, 50),
+    "DiabetesPedigreeFunction": (0.1, 2.5),
+    "Age": (15, 100)
+}
+
 # Clinical ranges for non-diabetic individuals
 non_diabetic_ranges = {
     "Pregnancies": (0, 5),
@@ -47,17 +59,17 @@ def predict():
     non_diabetic_warnings = []
 
     # Validate inputs and check non-diabetic ranges
-    for key, (min_val, max_val) in non_diabetic_ranges.items():
+    for key in valid_ranges.keys():  # Use the same keys from valid_ranges
         try:
             value = float(request.form[key])
             
-            # Basic validation
+            # Basic validation against absolute ranges
             if value < valid_ranges[key][0] or value > valid_ranges[key][1]:
                 error_messages.append(f"{key} must be between {valid_ranges[key][0]} and {valid_ranges[key][1]}")
             
             # Non-diabetic range check
-            elif value < min_val or value > max_val:
-                non_diabetic_warnings.append(f"{key} is outside typical non-diabetic range ({min_val}-{max_val})")
+            elif key in non_diabetic_ranges and (value < non_diabetic_ranges[key][0] or value > non_diabetic_ranges[key][1]):
+                non_diabetic_warnings.append(f"{key} is outside typical non-diabetic range ({non_diabetic_ranges[key][0]}-{non_diabetic_ranges[key][1]})")
             
             input_data.append(value)
             
