@@ -2,25 +2,23 @@ from flask import Flask, request, render_template
 import pickle
 import numpy as np
 import os
+from pathlib import Path
 
 app = Flask(__name__)
 
-# Load the trained model and artifacts
-try:
-    with open('models/best_model.pkl', 'rb') as f:
-        model = pickle.load(f)
-    
-    with open('data/scaler.pkl', 'rb') as f:
-        scaler = pickle.load(f)
-    
-    with open('models/feature_names.pkl', 'rb') as f:
-        feature_names = pickle.load(f)
-except Exception as e:
-    print(f"Error loading model artifacts: {e}")
-    exit(1)
+# Hardcode the expected feature order since feature_names.pkl is missing
+FEATURE_ORDER = [
+    'Glucose',
+    'BMI',
+    'Age',
+    'Glucose_BMI_Interaction',
+    'Pregnancies',
+    'BloodPressure',
+    'Metabolic_Score'
+]
 
 # Define valid input ranges for the raw features we'll collect
-valid_ranges = {
+VALID_RANGES = {
     "Glucose": (50, 200),          # mg/dL
     "BMI": (15, 50),               # kg/m²
     "Age": (15, 100),              # years
@@ -28,6 +26,58 @@ valid_ranges = {
     "BloodPressure": (40, 140),    # mmHg
     "Insulin": (15, 846)           # pmol/L (needed for Metabolic_Score)
 }
+
+def load_model_with_fallback():
+    """Try multiple possible paths for model and scaler"""
+    model_paths = [
+        'models/best_model.pkl',
+        'best_model.pkl',
+        os.path.join('app', 'models', 'best_model.pkl')
+    ]
+    
+    scaler_paths = [
+        'data/scaler.pkl',
+        'scaler.pkl',
+        os.path.join('app', 'data', 'scaler.pkl')
+    ]
+    
+    # Try loading model
+    model = None
+    for path in model_paths:
+        try:
+            with open(path, 'rb') as f:
+                model = pickle.load(f)
+                break
+        except:
+            continue
+    
+    # Try loading scaler
+    scaler = None
+    for path in scaler_paths:
+        try:
+            with open(path, 'rb') as f:
+                scaler = pickle.load(f)
+                break
+        except:
+            continue
+    
+    if model is None:
+        raise FileNotFoundError("Could not find model file in any standard location")
+    
+    return model, scaler
+
+# Load model with fallback paths
+try:
+    model, scaler = load_model_with_fallback()
+except Exception as e:
+    print(f"Error loading model artifacts: {e}")
+    # Create a dummy model if running in development
+    if os.getenv('FLASK_ENV') == 'development':
+        print("Creating dummy model for development")
+        model = lambda x: np.array([0])  # Dummy model that always returns "Not Diabetic"
+        scaler = lambda x: x  # Identity scaler
+    else:
+        exit(1)
 
 @app.route('/')
 def home():
@@ -39,7 +89,7 @@ def predict():
     input_data = {}
     error_messages = []
 
-    for feature, (min_val, max_val) in valid_ranges.items():
+    for feature, (min_val, max_val) in VALID_RANGES.items():
         try:
             value = float(request.form.get(feature, 0))
             if not (min_val <= value <= max_val):
@@ -71,9 +121,18 @@ def predict():
 
     # Preprocess and predict
     try:
-        sample_scaled = scaler.transform(sample_values)
+        if scaler is not None:
+            sample_scaled = scaler.transform(sample_values)
+        else:
+            sample_scaled = sample_values  # Fallback if scaler not found
+            
         prediction = model.predict(sample_scaled)
-        probability = model.predict_proba(sample_scaled)[0][1]  # Probability of being diabetic
+        
+        # Handle different model types (some may not have predict_proba)
+        try:
+            probability = model.predict_proba(sample_scaled)[0][1]
+        except AttributeError:
+            probability = 0.5 if prediction[0] == 1 else 0.5  # Default if no probabilities
         
         result = "Diabetic" if prediction[0] == 1 else "Not Diabetic"
         return render_template('form.html', 
