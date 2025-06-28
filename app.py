@@ -5,63 +5,41 @@ import os
 
 app = Flask(__name__)
 
-# Load the trained model with fallback
+# Load the trained model and artifacts
 try:
-    with open('best_model.pkl', 'rb') as f:
+    with open('models/best_model.pkl', 'rb') as f:
         model = pickle.load(f)
-except:
-    try:
-        with open('models/best_model.pkl', 'rb') as f:
-            model = pickle.load(f)
-    except Exception as e:
-        print(f"Error loading model: {e}")
-        model = None
+    
+    with open('data/scaler.pkl', 'rb') as f:
+        scaler = pickle.load(f)
+    
+    with open('models/feature_names.pkl', 'rb') as f:
+        feature_names = pickle.load(f)
+except Exception as e:
+    print(f"Error loading model artifacts: {e}")
+    exit(1)
 
-# Define input ranges and feature engineering
-FEATURES = {
-    # Raw features to collect from user
-    'raw': {
-        'Pregnancies': (0, 20),
-        'Glucose': (50, 200),
-        'BloodPressure': (40, 140),
-        'Insulin': (15, 846),
-        'BMI': (15, 50),
-        'Age': (15, 100)
-    },
-    # Features to engineer
-    'engineered': {
-        'Glucose_BMI_Interaction': lambda x: x['Glucose'] * x['BMI'],
-        'Metabolic_Score': lambda x: (x['Glucose'] * x['Insulin']) / (x['BMI'] + 1e-6)
-    },
-    # Final feature order expected by model
-    'order': [
-        'Glucose', 'BMI', 'Age', 
-        'Glucose_BMI_Interaction',
-        'Pregnancies', 'BloodPressure',
-        'Metabolic_Score'
-    ]
+# Define valid input ranges for the raw features we'll collect
+valid_ranges = {
+    "Glucose": (50, 200),          # mg/dL
+    "BMI": (15, 50),               # kg/m²
+    "Age": (15, 100),              # years
+    "Pregnancies": (0, 20),        # number
+    "BloodPressure": (40, 140),    # mmHg
+    "Insulin": (15, 846)           # pmol/L (needed for Metabolic_Score)
 }
 
 @app.route('/')
 def home():
-    return render_template('diabetes_form.html', 
-                         prediction=None, 
-                         probability=None,
-                         error_messages=[])
+    return render_template('form.html', prediction=None, probability=None, error_messages=[])
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    if model is None:
-        return render_template('diabetes_form.html',
-                            prediction="Error",
-                            probability="Model not loaded",
-                            error_messages=["System error: Model unavailable"])
-
-    # Collect and validate inputs
+    # Collect and validate raw input
     input_data = {}
     error_messages = []
 
-    for feature, (min_val, max_val) in FEATURES['raw'].items():
+    for feature, (min_val, max_val) in valid_ranges.items():
         try:
             value = float(request.form.get(feature, 0))
             if not (min_val <= value <= max_val):
@@ -71,46 +49,44 @@ def predict():
             error_messages.append(f"{feature} must be a valid number")
 
     if error_messages:
-        return render_template('diabetes_form.html',
-                            prediction=None,
-                            probability=None,
-                            error_messages=error_messages)
+        return render_template('form.html', 
+                             prediction=None, 
+                             probability=None, 
+                             error_messages=error_messages)
 
-    # Feature engineering
-    for feature, func in FEATURES['engineered'].items():
-        input_data[feature] = func(input_data)
+    # Feature engineering (same as during training)
+    input_data['Glucose_BMI_Interaction'] = input_data['Glucose'] * input_data['BMI']
+    input_data['Metabolic_Score'] = (input_data['Glucose'] * input_data['Insulin']) / (input_data['BMI'] + 1e-6)
 
-    # Prepare final input array
-    sample = np.array([[input_data[feature] for feature in FEATURES['order']]])
+    # Create array in correct feature order
+    sample_values = np.array([[
+        input_data['Glucose'],
+        input_data['BMI'],
+        input_data['Age'],
+        input_data['Glucose_BMI_Interaction'],
+        input_data['Pregnancies'],
+        input_data['BloodPressure'],
+        input_data['Metabolic_Score']
+    ]])
 
-    # Make prediction
+    # Preprocess and predict
     try:
-        prediction = model.predict(sample)[0]
-        try:
-            probability = model.predict_proba(sample)[0][1]
-        except AttributeError:
-            probability = 0.75 if prediction == 1 else 0.25
-
-        result = {
-            'prediction': 'Diabetic' if prediction == 1 else 'Not Diabetic',
-            'probability': f"{probability:.1%}",
-            'confidence': 'High' if probability > 0.7 or probability < 0.3 else 'Medium',
-            'features': input_data
-        }
-
-        return render_template('diabetes_form.html',
-                            prediction=result['prediction'],
-                            probability=result['probability'],
-                            confidence=result['confidence'],
-                            features=result['features'],
+        sample_scaled = scaler.transform(sample_values)
+        prediction = model.predict(sample_scaled)
+        probability = model.predict_proba(sample_scaled)[0][1]  # Probability of being diabetic
+        
+        result = "Diabetic" if prediction[0] == 1 else "Not Diabetic"
+        return render_template('form.html', 
+                            prediction=result, 
+                            probability=f"{probability:.1%}",
                             error_messages=[])
-
+    
     except Exception as e:
         error_messages.append(f"Prediction error: {str(e)}")
-        return render_template('diabetes_form.html',
-                            prediction=None,
-                            probability=None,
+        return render_template('form.html', 
+                            prediction=None, 
+                            probability=None, 
                             error_messages=error_messages)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000)
