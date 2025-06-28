@@ -6,76 +6,43 @@ from pathlib import Path
 
 app = Flask(__name__)
 
-# Hardcode the expected feature order since feature_names.pkl is missing
-FEATURE_ORDER = [
-    'Glucose',
-    'BMI',
-    'Age',
-    'Glucose_BMI_Interaction',
-    'Pregnancies',
-    'BloodPressure',
-    'Metabolic_Score'
-]
-
-# Define valid input ranges for the raw features we'll collect
+# Define the expected raw features and their valid ranges
 VALID_RANGES = {
-    "Glucose": (50, 200),          # mg/dL
-    "BMI": (15, 50),               # kg/m²
-    "Age": (15, 100),              # years
-    "Pregnancies": (0, 20),        # number
-    "BloodPressure": (40, 140),    # mmHg
-    "Insulin": (15, 846)           # pmol/L (needed for Metabolic_Score)
+    "Pregnancies": (0, 20),
+    "Glucose": (50, 200),
+    "BloodPressure": (40, 140),
+    "Insulin": (15, 846),
+    "BMI": (15, 50),
+    "Age": (15, 100)
 }
 
 def load_model_with_fallback():
-    """Try multiple possible paths for model and scaler"""
+    """Try multiple possible paths for model"""
     model_paths = [
         'models/best_model.pkl',
         'best_model.pkl',
         os.path.join('app', 'models', 'best_model.pkl')
     ]
     
-    scaler_paths = [
-        'data/scaler.pkl',
-        'scaler.pkl',
-        os.path.join('app', 'data', 'scaler.pkl')
-    ]
-    
     # Try loading model
-    model = None
     for path in model_paths:
         try:
             with open(path, 'rb') as f:
-                model = pickle.load(f)
-                break
+                return pickle.load(f)
         except:
             continue
     
-    # Try loading scaler
-    scaler = None
-    for path in scaler_paths:
-        try:
-            with open(path, 'rb') as f:
-                scaler = pickle.load(f)
-                break
-        except:
-            continue
-    
-    if model is None:
-        raise FileNotFoundError("Could not find model file in any standard location")
-    
-    return model, scaler
+    raise FileNotFoundError("Could not find model file in any standard location")
 
 # Load model with fallback paths
 try:
-    model, scaler = load_model_with_fallback()
+    model = load_model_with_fallback()
 except Exception as e:
-    print(f"Error loading model artifacts: {e}")
+    print(f"Error loading model: {e}")
     # Create a dummy model if running in development
     if os.getenv('FLASK_ENV') == 'development':
         print("Creating dummy model for development")
-        model = lambda x: np.array([0])  # Dummy model that always returns "Not Diabetic"
-        scaler = lambda x: x  # Identity scaler
+        model = lambda x: np.array([0])  # Dummy model
     else:
         exit(1)
 
@@ -100,15 +67,15 @@ def predict():
 
     if error_messages:
         return render_template('form.html', 
-                             prediction=None, 
-                             probability=None, 
-                             error_messages=error_messages)
+                            prediction=None, 
+                            probability=None,
+                            error_messages=error_messages)
 
-    # Feature engineering (same as during training)
+    # Feature engineering
     input_data['Glucose_BMI_Interaction'] = input_data['Glucose'] * input_data['BMI']
     input_data['Metabolic_Score'] = (input_data['Glucose'] * input_data['Insulin']) / (input_data['BMI'] + 1e-6)
 
-    # Create array in correct feature order
+    # Create array in the order the model expects
     sample_values = np.array([[
         input_data['Glucose'],
         input_data['BMI'],
@@ -119,32 +86,27 @@ def predict():
         input_data['Metabolic_Score']
     ]])
 
-    # Preprocess and predict
+    # Predict
     try:
-        if scaler is not None:
-            sample_scaled = scaler.transform(sample_values)
-        else:
-            sample_scaled = sample_values  # Fallback if scaler not found
-            
-        prediction = model.predict(sample_scaled)
+        prediction = model.predict(sample_values)
         
-        # Handle different model types (some may not have predict_proba)
+        # Handle probability if available
         try:
-            probability = model.predict_proba(sample_scaled)[0][1]
+            probability = model.predict_proba(sample_values)[0][1]
         except AttributeError:
-            probability = 0.5 if prediction[0] == 1 else 0.5  # Default if no probabilities
+            probability = 0.5 if prediction[0] == 1 else 0.5
         
         result = "Diabetic" if prediction[0] == 1 else "Not Diabetic"
         return render_template('form.html', 
-                            prediction=result, 
+                            prediction=result,
                             probability=f"{probability:.1%}",
                             error_messages=[])
     
     except Exception as e:
         error_messages.append(f"Prediction error: {str(e)}")
         return render_template('form.html', 
-                            prediction=None, 
-                            probability=None, 
+                            prediction=None,
+                            probability=None,
                             error_messages=error_messages)
 
 if __name__ == '__main__':
