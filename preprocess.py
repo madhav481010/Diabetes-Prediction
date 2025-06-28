@@ -11,7 +11,7 @@ import pickle
 columns = ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin',
            'BMI', 'DiabetesPedigreeFunction', 'Age', 'Outcome']
 df = pd.read_csv("https://raw.githubusercontent.com/madhav481010/Diabetes-Prediction/main/diabetes.csv", names=columns, header=0)
-
+print(df)
 # Replace biologically implausible zeroes with NaN
 na_columns = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
 df[na_columns] = df[na_columns].replace(0, np.nan)
