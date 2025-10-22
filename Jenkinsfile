@@ -2,50 +2,32 @@ pipeline {
     agent any
 
     stages {
-        stage('Clone Repository') {
+        stage('Build') {
             steps {
-                git branch: 'main', url: 'https://github.com/madhav481010/Diabetes-Prediction.git'
+                echo 'Building the project...'
+                sh 'mvn clean package'
             }
         }
 
-        stage('Install Python Dependencies') {
+        stage('Test') {
             steps {
-                bat '"C:\\Users\\hp1\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -m pip install --upgrade pip'
-                bat '"C:\\Users\\hp1\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -m pip install -r requirements.txt'
+                echo 'Running tests...'
+                sh 'mvn test'
             }
         }
 
-        stage('Job 1: Preprocess Data') {
+        stage('Deploy to Staging') {
             steps {
-                bat '"C:\\Users\\hp1\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" preprocess.py'
+                echo 'Deploying to staging...'
+                sh './deploy_staging.sh'
             }
         }
 
-        stage('Job 2: Train and Evaluate Models') {
+        stage('Deploy to Production') {
             steps {
-                bat '"C:\\Users\\hp1\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" train_and_evaluate.py'
+                echo 'Deploying to production...'
+                sh './deploy_prod.sh'
             }
-        }
-
-        stage('Job 3: Deploy and Predict') {
-            steps {
-                bat '"C:\\Users\\hp1\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" deploy.py'
-            }
-        }
-
-        stage('Start Flask Server') {
-            steps {
-                bat '"C:\\Users\\hp1\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" app.py'
-            }
-        }
-    }
-
-    post {
-        success {
-            echo '✅ Pipeline completed successfully.'
-        }
-        failure {
-            echo '❌ Pipeline failed.'
         }
     }
 }
